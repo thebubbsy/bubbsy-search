@@ -1,0 +1,15 @@
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+Bubbsy Search is licensed under the GNU General Public License v3.0 or later
+(SPDX: GPL-3.0-or-later).
+
+The full text of the GNU General Public License version 3 is available at:
+    https://www.gnu.org/licenses/gpl-3.0.txt
+
+Add the complete license text to this file before distributing binaries.
+
+This project is a derivative work of a GPLv3-licensed Windhawk mod (see NOTICE),
+therefore it must be distributed under the same license. voidtools Everything,
+which the installer bundles, is proprietary and is NOT covered by this license;
+see NOTICE for details.

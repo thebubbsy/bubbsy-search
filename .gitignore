@@ -1,0 +1,24 @@
+# Build output
+/build/
+/out/
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.dll
+*.exe
+
+# Installer output
+/installer/Output/
+*.iss.bak
+
+# Bundled Everything payload (fetched at packaging time, never committed)
+/third_party/everything/*
+!/third_party/everything/README.md
+
+# IDE
+.vs/
+.vscode/
+*.user
+CMakeSettings.json
