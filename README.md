@@ -1,84 +1,78 @@
 # Bubbsy Search
 
-**Instant search and real folder sizes inside Windows File Explorer — from a single install.**
+**Instant search and real folder sizes inside Windows File Explorer — from one install.**
 
-Bubbsy Search brings the speed of [voidtools Everything](https://www.voidtools.com/) directly into
-File Explorer. Type in the Explorer search box and get results *instantly* instead of waiting on the
-slow Windows Search indexer. Folder sizes show up in the details view without freezing Explorer on
-huge directories. You install **one** thing — no need to know what "Everything" or "Windhawk" are.
+Type in the File Explorer search box and get results *instantly* (powered by the
+[Everything](https://www.voidtools.com/) engine) instead of waiting on Windows Search. Folder sizes
+show up in the details view. You install **one** thing — no need to know what "Everything" or
+"Windhawk" are.
 
-> **Author:** [TheBubbsy](https://github.com/thebubbsy) · [onyachamp.com](https://onyachamp.com/)
+> Author: [TheBubbsy](https://github.com/thebubbsy) · [onyachamp.com](https://onyachamp.com/)
 
 ---
 
-## What you get
+## ⚠️ Status: no installer exists yet
 
-- ⚡ **Instant Explorer search** — the Explorer search box is redirected to the Everything engine.
-- 📁 **Real folder sizes** in Details / Tiles / Content views, pulled from the Everything index (no
-  slow recursive crawling).
-- 🧱 **Custom search-result columns** — choose which columns show up in search results.
-- 🙈 **System / hidden file filters** — hide them from results with one checkbox.
-- 🧰 **Human-readable sizes** (MB/GB/TB) with optional IEC units (KiB/MiB/GiB).
-- 🚀 **Zero setup** — installs, configures, and auto-starts itself. No manual `.ini` editing.
+**Right now there is nothing an average user can download and run.** This repo is the *source code*.
+To get the one-click `BubbsySearchSetup.exe`, someone has to compile and sign it on a Windows machine
+first (see [Build the installer](#build-the-installer-required-once-to-produce-the-exe) below). Once
+that's done and a build is uploaded to **Releases**, the install becomes the 3 steps in the next
+section. Until then, ignore any "just install it" expectation — it's not built yet.
 
-## How it actually works (the honest version)
+---
 
-Everything's index engine is closed-source and always runs as its own process; you can't merge it
-into another program. Explorer results require code running *inside* `explorer.exe`. So Bubbsy Search
-is **one product the user installs and sees**, made of three cooperating pieces under the hood:
+## Install (for users) — once a release exists
 
-```
-┌─ Bubbsy Search (what the user installs) ───────────────────────────────┐
-│                                                                        │
-│  bubbsy-host.exe  ── tray app + lifecycle manager (the "one thing")    │
-│      │                                                                 │
-│      ├── launches & supervises a HEADLESS Everything.exe child         │
-│      │     (no window, no tray icon of its own; our managed instance)  │
-│      │                                                                 │
-│      └── injects bubbsy-hook.dll into explorer.exe                     │
-│                │                                                       │
-│                └── folder sizes · search redirect · custom columns     │
-│                    (talks to the Everything child over IPC)            │
-└────────────────────────────────────────────────────────────────────────┘
-```
+1. Go to the [**Releases**](https://github.com/thebubbsy/bubbsy-search/releases) page and download
+   **`BubbsySearchSetup.exe`**.
+2. Double-click it. If Windows SmartScreen warns you, click **More info → Run anyway** (it warns for
+   any app that isn't signed by a big vendor).
+3. Click **Next** through the wizard. When it asks **"Do you already have Everything installed?"**:
+   - **No** (most people) → it installs everything for you.
+   - **Yes** → it uses your existing Everything.
 
-- **`bubbsy-host.exe`** — the process the user thinks of as "the app". Runs in the tray, owns
-  settings, manages the Everything child, and injects the hook DLL. Auto-starts at login.
-- **Headless Everything** — bundled and run with `-startup` and a dedicated instance name so it
-  never shows a window and never collides with a copy the user may already run.
-- **`bubbsy-hook.dll`** — replaces the old Windhawk dependency. Hooks `CFSFolder::_GetSize`, the
-  Explorer search navigation, and the shell registry values that control result columns.
+That's it. Explorer restarts once, and from then on your search box is instant. Bubbsy Search runs
+quietly in the system tray (bottom-right, near the clock) and starts automatically with Windows.
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for detail.
+**To uninstall:** Settings → Apps → *Bubbsy Search* → Uninstall (or use the Start-menu uninstaller).
 
-## "Do you already have Everything?"
+---
 
-The installer asks this. If **yes**, Bubbsy Search does *not* install its own copy — it detects and
-drives your existing Everything install. If **no**, it installs a private headless copy that only
-Bubbsy Search manages.
+## For developers
 
-## Build
+### What it is under the hood
+One product the user installs, made of three cooperating parts (Everything's engine is closed-source
+and runs as its own process; Explorer results require a DLL inside `explorer.exe`, so a single
+process truly isn't possible — this is the honest minimum):
 
-Windows + a recent MSVC or clang-cl toolchain and CMake. See [`docs/BUILD.md`](docs/BUILD.md).
+- **`bubbsy-host.exe`** — the tray app the user sees. Supervises a hidden headless Everything, injects
+  the hook, handles autostart.
+- **`bubbsy-hook.dll`** — runs inside `explorer.exe`: folder sizes, search redirect, custom columns.
+- **Installer** — bundles it all and asks the "do you have Everything?" question.
 
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+### Build the binaries
+Needs Windows x64 + Visual Studio 2022 (Desktop C++) + CMake ≥ 3.24. Full detail in
+[`docs/BUILD.md`](docs/BUILD.md).
 ```powershell
 cmake -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
-# then build the installer with Inno Setup 6:
-iscc installer\bubbsy-search.iss
 ```
 
-## Status
+### Build the installer (required once, to produce the .exe)
+Needs [Inno Setup 6](https://jrsoftware.org/isdl.php). If you want the bundled-Everything option, drop
+a redistributable `Everything.exe` into `third_party/everything/` first (see that folder's README).
+```powershell
+iscc installer\bubbsy-search.iss
+# produces installer\Output\BubbsySearchSetup.exe  — this is the file users download
+```
+Sign it before sharing so users don't get scary SmartScreen warnings (see `docs/BUILD.md`).
 
-Early scaffold. The Everything IPC, the Explorer hooks, and the installer's Everything-choice page
-are implemented; the injector, tray host, and lifecycle manager are implemented and need testing on
-real Windows targets. This has **not** yet been compiled/signed into a shipping installer.
+---
 
-## Licensing — please read
-
-`bubbsy-hook.dll` is **derived from m417z's GPLv3 Windhawk mod** "Better file sizes in Explorer", so
-the hook DLL and this repository are licensed **GPL-3.0-or-later**. See [`LICENSE`](LICENSE) and
-[`NOTICE`](NOTICE). voidtools **Everything is not part of this source tree** — it is bundled at
-packaging time under **its own license**, unmodified; Bubbsy Search only talks to it via its public
-SDK/IPC. You must comply with Everything's redistribution terms when you build an installer that
-bundles it.
+## Licensing (important)
+The hook DLL is derived from m417z's **GPLv3** Windhawk mod, so this project is
+**GPL-3.0-or-later** ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)). voidtools **Everything is not in this
+source tree** — it's bundled at packaging time under its own proprietary license, unmodified. Comply
+with its terms if you distribute an installer that includes it.
