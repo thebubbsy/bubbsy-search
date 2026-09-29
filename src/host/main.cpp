@@ -8,6 +8,8 @@
 #include <windows.h>
 #include <shellapi.h>
 #include <string>
+#include <cstdlib>
+#include <cwchar>
 #include "injector.h"
 #include "everything_manager.h"
 #include "autostart.h"

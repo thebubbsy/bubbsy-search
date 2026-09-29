@@ -165,7 +165,7 @@ static bool InstallHooks() {
 
     g_origGetSize = (GetSize_t)sym::ResolveCFSFolderGetSize();
     if (g_origGetSize)
-        Hook(g_origGetSize, (void*)GetSize_Hook, &g_origGetSize);  // note: rebinds orig via trampoline
+        Hook((void*)g_origGetSize, (void*)GetSize_Hook, &g_origGetSize);
 
     HMODULE shell32 = GetModuleHandleW(L"shell32.dll");
     if (auto p = shell32 ? GetProcAddress(shell32, "ShellExecuteExW") : nullptr)

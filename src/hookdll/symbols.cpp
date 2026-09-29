@@ -31,16 +31,14 @@ void* Resolve(HMODULE module, const char* name) {
 
     wchar_t path[MAX_PATH];
     if (!GetModuleFileNameW(module, path, MAX_PATH)) return nullptr;
-    MODULEINFO mi{};
     // Load module symbols (idempotent).
     DWORD64 base = SymLoadModuleExW(g_proc, nullptr, path, nullptr, 0, 0, nullptr, 0);
     if (!base) base = (DWORD64)module;
 
-    char buf[sizeof(SYMBOL_INFO) + 1024] = {};
+    alignas(SYMBOL_INFO) char buf[sizeof(SYMBOL_INFO) + 1024] = {};
     auto* si = reinterpret_cast<SYMBOL_INFO*>(buf);
     si->SizeOfStruct = sizeof(SYMBOL_INFO);
     si->MaxNameLen = 1024;
-    if (SymFromNameW ? false : true) { /* prefer ANSI below */ }
     if (!SymFromName(g_proc, name, si)) return nullptr;
     return reinterpret_cast<void*>(si->Address);
 }
