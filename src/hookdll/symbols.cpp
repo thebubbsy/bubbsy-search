@@ -20,7 +20,7 @@ void EnsureInit() {
         std::string cacheA(cache.begin(), cache.end());
         std::string search = "srv*" + cacheA + "*https://msdl.microsoft.com/download/symbols";
         SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_AUTO_PUBLICS);
-        SymInitializeA(g_proc, search.c_str(), FALSE);
+        SymInitialize(g_proc, search.c_str(), FALSE);
     });
 }
 }  // namespace

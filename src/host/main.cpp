@@ -51,7 +51,7 @@ void AddTray(HWND hwnd) {
     g_nid.uCallbackMessage = WM_TRAY;
     g_nid.hIcon = (HICON)LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101),
                                     IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
-    if (!g_nid.hIcon) g_nid.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+    if (!g_nid.hIcon) g_nid.hIcon = LoadIconW(nullptr, MAKEINTRESOURCEW(32512));  // IDI_APPLICATION
     wcscpy_s(g_nid.szTip, L"Bubbsy Search");
     Shell_NotifyIconW(NIM_ADD, &g_nid);
 }
