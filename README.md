@@ -11,13 +11,16 @@ show up in the details view. You install **one** thing — no need to know what 
 
 ---
 
-## ⚠️ Status: no installer exists yet
+## Status
 
-**Right now there is nothing an average user can download and run.** This repo is the *source code*.
-To get the one-click `BubbsySearchSetup.exe`, someone has to compile and sign it on a Windows machine
-first (see [Build the installer](#build-the-installer-required-once-to-produce-the-exe) below). Once
-that's done and a build is uploaded to **Releases**, the install becomes the 3 steps in the next
-section. Until then, ignore any "just install it" expectation — it's not built yet.
+The one-click `BubbsySearchSetup.exe` is **built automatically by GitHub** — no compiler needed by you
+or the user. Every push to `main` builds it (downloadable from the workflow run), and pushing a
+version tag publishes it to the [**Releases**](https://github.com/thebubbsy/bubbsy-search/releases)
+page where any normal user can download it. See [Cutting a release](#cutting-a-release).
+
+> Heads-up: the code is an early scaffold, so the first few automated builds may fail on compile
+> errors that get fixed as they surface. A green build on the Actions tab means the installer is
+> ready on that run.
 
 ---
 
@@ -68,6 +71,17 @@ iscc installer\bubbsy-search.iss
 # produces installer\Output\BubbsySearchSetup.exe  — this is the file users download
 ```
 Sign it before sharing so users don't get scary SmartScreen warnings (see `docs/BUILD.md`).
+
+### Cutting a release
+The installer is built by [`.github/workflows/build-installer.yml`](.github/workflows/build-installer.yml)
+on GitHub's Windows runners. To publish a downloadable installer to the Releases page:
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+GitHub compiles the binaries, downloads Everything, builds `BubbsySearchSetup.exe`, and attaches it to
+a new Release automatically. (Every push to `main` also builds it — grab it from the run's
+**Artifacts** — but only tags create a public Release.)
 
 ---
 
